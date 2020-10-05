@@ -10,6 +10,7 @@ import tensorflow as tf
 from tracker.non_maximum_suppression import non_max_suppression_fast
 
 
+
 class HandTracker(object):
     r"""
     Class to use Google's Mediapipe HandTracking pipeline from Python.
@@ -138,13 +139,13 @@ class HandTracker(object):
         # finding the best prediction
         probabilities = self._sigm(out_clf)
         # confidence
-        detecion_mask = probabilities > 0.95
+        detecion_mask = probabilities > 0.96
         candidate_detect = out_reg[detecion_mask]
         candidate_anchors = self.anchors[detecion_mask]
         probabilities = probabilities[detecion_mask]
 
         if candidate_detect.shape[0] == 0:
-            print("No hands found")
+            # print("No hands found")
             return None, None, None
 
         # Pick the best bounding box with non maximum suppression
