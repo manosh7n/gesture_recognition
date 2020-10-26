@@ -15,6 +15,6 @@ class Classifier(object):
 
     @staticmethod
     def preprocessing(image):
-        image = cv2.resize(image, (150, 150), interpolation=cv2.INTER_LINEAR) / 255
+        image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_LINEAR) / 255
         image = np.expand_dims(image, axis=0)
         return image
