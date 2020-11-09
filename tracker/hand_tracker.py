@@ -17,9 +17,8 @@ class HandTracker(object):
 
     Args:
         palm_model: path to the palm_detection.tflite
-        joint_model: path to the hand_landmark.tflite
         anchors_path: path to the csv containing SSD anchors
-    Ourput:
+    Output:
         (21,2) array of hand joints.
     Examples::
         # >>> det = HandTracker(path1, path2, path3)
@@ -27,22 +26,20 @@ class HandTracker(object):
         # >>> keypoints, bbox = det(input_img)
     """
 
-    def __init__(self, palm_model, joint_model, anchors_path,
+    def __init__(self, palm_model, anchors_path,
                  box_enlarge=1.5, box_shift=0.2):
         self.box_shift = box_shift
         self.box_enlarge = box_enlarge
 
         self.interp_palm = tf.lite.Interpreter(palm_model)
         self.interp_palm.allocate_tensors()
-        # self.interp_joint = tf.lite.Interpreter(joint_model)
-        # self.interp_joint.allocate_tensors()
 
         # reading the SSD anchors
         with open(anchors_path, "r") as csv_f:
             self.anchors = np.r_[
                 [x for x in csv.reader(csv_f, quoting=csv.QUOTE_NONNUMERIC)]
             ]
-        # reading tflite model paramteres
+        # reading tflite model parameteres
         output_details = self.interp_palm.get_output_details()
         input_details = self.interp_palm.get_input_details()
 
@@ -50,12 +47,8 @@ class HandTracker(object):
         self.out_reg_idx = output_details[0]['index']
         self.out_clf_idx = output_details[1]['index']
 
-        # self.in_idx_joint = self.interp_joint.get_input_details()[0]['index']
-        # self.out_idx_joint = self.interp_joint.get_output_details()[0]['index']
-
         # 90° rotation matrix used to create the alignment trianlge
         self.R90 = np.r_[[[0, 1], [-1, 0]]]
-
         # trianlge target coordinates used to move the detected hand
         # into the right position
         self._target_triangle = np.float32([
@@ -93,8 +86,7 @@ class HandTracker(object):
     @staticmethod
     def _im_normalize(img):
         return np.ascontiguousarray(
-            2 * ((img / 255) - 0.5
-                 ).astype('float32'))
+            2 * ((img / 255) - 0.5).astype('float32'))
 
     @staticmethod
     def _sigm(x):
@@ -103,14 +95,6 @@ class HandTracker(object):
     @staticmethod
     def _pad1(x):
         return np.pad(x, ((0, 0), (0, 1)), constant_values=1, mode='constant')
-
-    # def predict_joints(self, img_norm):
-    #     self.interp_joint.set_tensor(
-    #         self.in_idx_joint, img_norm.reshape(1,256,256,3))
-    #     self.interp_joint.invoke()
-    #
-    #     joints = self.interp_joint.get_tensor(self.out_idx_joint)
-    #     return joints.reshape(-1,2)
 
     def detect_hand(self, img_norm):
         assert -1 <= img_norm.min() and img_norm.max() <= 1, \
@@ -137,7 +121,7 @@ class HandTracker(object):
         # finding the best prediction
         probabilities = self._sigm(out_clf)
         # confidence
-        detecion_mask = probabilities > 0.87
+        detecion_mask = probabilities > 0.93
         candidate_detect = out_reg[detecion_mask]
         candidate_anchors = self.anchors[detecion_mask]
         probabilities = probabilities[detecion_mask]
@@ -183,10 +167,9 @@ class HandTracker(object):
         # fit the image into a 256x256 square
         shape = np.r_[img.shape]
         pad = (shape.max() - shape[:2]).astype('uint32') // 2
-        img_pad = np.pad(
-            img,
-            ((pad[0], pad[0]), (pad[1], pad[1]), (0, 0)),
-            mode='constant')
+        img_pad = np.pad(img,
+                         ((pad[0], pad[0]), (pad[1], pad[1]), (0, 0)),
+                         mode='constant')
         img_small = cv2.resize(img_pad, (256, 256))
         img_small = np.ascontiguousarray(img_small)
 
@@ -196,9 +179,9 @@ class HandTracker(object):
     def __call__(self, img):
         img_pad, img_norm, pad = self.preprocess_img(img)
 
-        source, keypoints, _ = self.detect_hand(img_norm)
+        source, _, _ = self.detect_hand(img_norm)
         if source is None:
-            return None, None
+            return None
 
         # calculating transformation from img_pad coords
         # to img_landmark coords (cropped hand image)
@@ -208,12 +191,6 @@ class HandTracker(object):
             self._target_triangle
         )
 
-        # img_landmark = cv2.warpAffine(
-        #     self._im_normalize(img_pad), Mtr, (256,256)
-        # )
-
-        # joints = self.predict_joints(img_landmark)
-
         # adding the [0,0,1] row to make the matrix square
         Mtr = self._pad1(Mtr.T).T
         Mtr[2, :2] = 0
@@ -221,22 +198,7 @@ class HandTracker(object):
         Minv = np.linalg.inv(Mtr)
 
         # projecting keypoints back into original image coordinate space
-        # kp_orig = (self._pad1(joints) @ Minv.T)[:,:2]
         box_orig = (self._target_box @ Minv.T)[:, :2]
-        # kp_orig -= pad[::-1]
         box_orig -= pad[::-1]
 
-        return _, box_orig
-
-#        8   12  16  20
-#        |   |   |   |
-#        7   11  15  19
-#    4   |   |   |   |
-#    |   6   10  14  18
-#    3   |   |   |   |
-#    |   5---9---13--17
-#    2    \         /
-#     \    \       /
-#      1    \     /
-#       \    \   /
-#        ------0-
+        return box_orig

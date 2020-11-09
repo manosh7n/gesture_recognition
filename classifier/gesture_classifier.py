@@ -4,6 +4,9 @@ from tensorflow.keras import models
 
 
 class Classifier(object):
+    """
+    MobileNetV2 classifier model from keras
+    """
 
     def __init__(self, model_path):
         self.model = models.load_model(model_path)
