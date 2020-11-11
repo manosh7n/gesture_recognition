@@ -4,7 +4,7 @@ from tracker.hand_tracker import HandTracker
 from classifier.gesture_classifier import Classifier
 
 WINDOW = "Gesture recognition"
-PALM_MODEL_PATH = "models/palm_detection_without_custom_op.tflite"
+PALM_MODEL_PATH = "models/palm_detection.tflite"
 CLASSIFIER_MODEL_PATH = "models/model_mobile4_with_new.h5"
 ANCHORS_PATH = "models/anchors.csv"
 DEVICE_ID = 0
