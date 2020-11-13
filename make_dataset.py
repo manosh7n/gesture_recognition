@@ -5,7 +5,7 @@ from app import crop_hand, detector, WINDOW, PALM_MODEL_PATH, ANCHORS_PATH, DEVI
 
 
 def save_image(img, name):
-    cv2.imwrite(f'dataset/n/n_{name}_{np.random.randint(0, 1e3, 1)[0]}.png', img)
+    cv2.imwrite(f'dataset/k/k_{name}_{np.random.randint(0, 1e5, 1)[0]}.png', img)
 
 
 def main():
