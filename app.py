@@ -7,10 +7,10 @@ from scipy.stats import mode
 
 WINDOW = "Gesture recognition"
 PALM_MODEL_PATH = "models/palm_detection.tflite"
-CLASSIFIER_MODEL_PATH = "models/model_mobile10.h5"
+CLASSIFIER_MODEL_PATH = "models/model_mobile11.h5"
 ANCHORS_PATH = "models/anchors.csv"
 DEVICE_ID = 0
-ALPH = ['А', 'Б', 'В', 'Г', 'И', 'М', 'Н', 'О', 'Р', 'С']
+ALPH = ['А', 'Б', 'В', 'Г', 'И', 'К', 'М', 'Н', 'О', 'С', 'У']
 
 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
 writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 10, (640, 480), True)
