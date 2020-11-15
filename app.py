@@ -13,7 +13,7 @@ DEVICE_ID = 0
 ALPH = ['А', 'Б', 'В', 'Г', 'И', 'К', 'М', 'Н', 'О', 'С', 'У']
 
 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 10, (640, 480), True)
+writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 9, (640, 480), True)
 detector = HandTracker(PALM_MODEL_PATH,
                        ANCHORS_PATH,
                        box_shift=0.2,
@@ -33,9 +33,9 @@ def crop_hand(bbox, frame):
 def show_predict(predict, frame):
     pred_sign = np.argmax(predict)
     for i, sign in enumerate(ALPH):
-        cv2.putText(frame, f'{sign}: {predict[i]:.3f}',
-                    (20, 30 * (i + 1)), cv2.FONT_HERSHEY_COMPLEX, 0.7,
-                    (0, 255, 0) if pred_sign == i else (0, 0, 255), 2)
+        cv2.putText(frame, f'{sign}: {predict[i]:.2f}',
+                    (5, 20 * (i + 1)), cv2.FONT_HERSHEY_COMPLEX, 0.67,
+                    (50, 224, 30) if pred_sign == i else (20, 20, 230), 2)
 
 
 def main():
@@ -48,7 +48,7 @@ def main():
     eval_utils.clear_folder()
     frame_count = 0
     predictions = []
-    word = []
+    word = ''
     while True:
         _, frame = capture.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -66,19 +66,22 @@ def main():
                     eval_utils.collect_img(crop, predict[0])
                     eval_utils.get_accuracy('Г')
 
-                cv2.polylines(frame, bbox_pt, 1, (0, 255, 0), 2)
-                cv2.imshow('Palm', cv2.resize(crop, (224, 224), interpolation=cv2.INTER_LINEAR))
-                cv2.moveWindow('Palm', 20, 20)
+            cv2.polylines(frame, bbox_pt, 1, (50, 224, 30), 2)
+            cv2.imshow('Palm', cv2.resize(crop, (224, 224), interpolation=cv2.INTER_LINEAR))
+            cv2.moveWindow('Palm', 20, 20)
 
         # progress bar for classification
-        cv2.rectangle(frame, (5, 458), (630, 472), (233, 111, 0), -1)
-        cv2.rectangle(frame, (5, 458), (int(630 * frame_count / 30), 472), (111, 233, 0), -1)
+        cv2.rectangle(frame, (5, 463), (630, 477), (233, 111, 0), -1)
+        cv2.rectangle(frame, (5, 463), (int(630 * frame_count / 30), 477), (111, 233, 0), -1)
         if frame_count == 30:
-            word.append(ALPH[mode(predictions)[0][0]])
+            mode_predict, val_count = mode(predictions)
+            if val_count > frame_count // 2:
+                word += ALPH[mode_predict[0]]
             frame_count = 0
             predictions = []
 
-        cv2.putText(frame, str(word), (5, 430), cv2.FONT_HERSHEY_COMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.rectangle(frame, (5, 440), (630, 460), (250, 250, 250), -1)
+        cv2.putText(frame, word, (5, 458), cv2.FONT_HERSHEY_COMPLEX, 0.7, (20, 20, 20), 2)
         key = cv2.waitKey(1)
         if key == 27:
             break
@@ -86,8 +89,8 @@ def main():
         if key == ord('e'):
             evaluate = not evaluate
         # clear predicted word
-        if key == ord('c'):
-            word = []
+        if key == ord('c') or len(word) >= 45:
+            word = ''
             frame_count = 0
 
         cv2.imshow(WINDOW, frame)
