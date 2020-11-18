@@ -9,20 +9,29 @@ from classifier.gesture_classifier import Classifier
 def show_predict(predict, frame, clf):
     if clf == 'pts':
         shift = frame.shape[1]-80
+        shift_y = 38
         cv2.rectangle(frame, (shift-5, 22), (frame.shape[1]-3, 5), (255, 255, 255), thickness=-1)
         cv2.putText(frame, '  Points',
                     (shift, 20), cv2.FONT_HERSHEY_COMPLEX, 0.47,
                     (0, 0, 0), 2)
-    else:
+    elif clf == 'cnn':
         shift = 5
+        shift_y = 38
         cv2.rectangle(frame, (shift, 22), (75, 5), (255, 255, 255), thickness=-1)
         cv2.putText(frame, '  CNN',
                     (shift, 20), cv2.FONT_HERSHEY_COMPLEX, 0.47,
                     (0, 0, 0), 2)
+    else:
+        shift = frame.shape[1] - 80
+        shift_y = 235
+        cv2.rectangle(frame, (shift - 5, 219), (frame.shape[1] - 3, 205), (255, 255, 255), thickness=-1)
+        cv2.putText(frame, '  Mean',
+                    (shift, 217), cv2.FONT_HERSHEY_COMPLEX, 0.47,
+                    (0, 0, 0), 2)
     pred_sign = np.argmax(predict)
     for i, sign in enumerate(ALPH):
         cv2.putText(frame, f'{sign}: {predict[i]:.2f}',
-                    (shift, 20 * (i + 2)), cv2.FONT_HERSHEY_COMPLEX, 0.62,
+                    (shift, shift_y + (20*i+1)), cv2.FONT_HERSHEY_COMPLEX, 0.62,
                     (50, 224, 30) if pred_sign == i else (20, 20, 230), 2)
 
 
@@ -57,8 +66,8 @@ def draw_progress_bar(frame, frame_count, word):
 
 WINDOW = "Gesture recognition"
 CLASSIFIER_MODEL_PATH = "models/model_mobile9.h5"
-KEY_POINTS_CLASSIFIER_PATH = 'models/rf_model.sav'
-DEVICE_ID = 1
+KEY_POINTS_CLASSIFIER_PATH = 'models/lr_model.sav'
+DEVICE_ID = 0
 ALPH = ['А', 'Б', 'В', 'Г', 'И', 'К', 'Н', 'О', 'С']
 
 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
@@ -92,11 +101,11 @@ while cap.isOpened():
         frame_count += 1
         x_coo = []
         y_coo = []
-        test = []
+        pts_to_pred = []
 
         for hand_landmarks in results.multi_hand_landmarks:
             for mark in hand_landmarks.landmark:
-                test.extend([mark.x, mark.y])
+                pts_to_pred.extend([mark.x, mark.y, mark.z])
                 x_coo.append(mark.x)
                 y_coo.append(mark.y)
 
@@ -104,13 +113,15 @@ while cap.isOpened():
             mp_drawing.draw_landmarks(
                 image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-            test = np.array(test).reshape(1, -1)
-            pred_pts = loaded_model.predict_proba(test)[0]
+            pts_to_pred = np.array(pts_to_pred).reshape(1, -1)
+            pred_pts = loaded_model.predict_proba(pts_to_pred)[0]
             pred_cnn = classifier(crop)[0]
             predictions.append(np.argmax(pred_pts))
+            mean_pred = (pred_cnn*0.5 + pred_pts*1.5) / 2
 
             show_predict(pred_pts, image, 'pts')
             show_predict(pred_cnn, image, 'cnn')
+            show_predict(mean_pred, image, 'mean')
 
     draw_progress_bar(image, frame_count, word)
     if frame_count == 45:
