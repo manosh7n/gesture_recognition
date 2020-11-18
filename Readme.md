@@ -34,6 +34,8 @@ A model from the mediapipe framework is used for palm detection. Gesture classif
 1) Clone this repository:
 
       `git clone https://github.com/manosh7n/gesture_recognition.git`
+      
+      `cd gesture_recognition`
 2) Create virtual environment:
 
      `python -m venv env`
