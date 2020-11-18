@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import mediapipe as mp
 from scipy.stats import mode
-from cnn_clf.classifier import Classifier
+from classifier.classifier import Classifier
 
 
 def show_predict(predict, frame, pos, clf_name):
