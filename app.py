@@ -3,29 +3,29 @@ import pickle
 import numpy as np
 import mediapipe as mp
 from scipy.stats import mode
-from classifier.gesture_classifier import Classifier
+from classifier.classifier import Classifier
 
 
-def show_predict(predict, frame, clf):
-    if clf == 'pts':
+def show_predict(predict, frame, pos, clf_name):
+    if pos == 0:
         shift = frame.shape[1]-80
         shift_y = 38
         cv2.rectangle(frame, (shift-5, 22), (frame.shape[1]-3, 5), (255, 255, 255), thickness=-1)
-        cv2.putText(frame, '  Points',
+        cv2.putText(frame, clf_name,
                     (shift, 20), cv2.FONT_HERSHEY_COMPLEX, 0.47,
                     (0, 0, 0), 2)
-    elif clf == 'cnn':
+    elif pos == 1:
         shift = 5
         shift_y = 38
         cv2.rectangle(frame, (shift, 22), (75, 5), (255, 255, 255), thickness=-1)
-        cv2.putText(frame, '  CNN',
+        cv2.putText(frame, clf_name,
                     (shift, 20), cv2.FONT_HERSHEY_COMPLEX, 0.47,
                     (0, 0, 0), 2)
     else:
         shift = frame.shape[1] - 80
         shift_y = 235
         cv2.rectangle(frame, (shift - 5, 219), (frame.shape[1] - 3, 205), (255, 255, 255), thickness=-1)
-        cv2.putText(frame, '  Mean',
+        cv2.putText(frame, clf_name,
                     (shift, 217), cv2.FONT_HERSHEY_COMPLEX, 0.47,
                     (0, 0, 0), 2)
     pred_sign = np.argmax(predict)
@@ -59,7 +59,7 @@ def draw_crop_bb(frame, x, y):
 
 def draw_progress_bar(frame, frame_count, word):
     cv2.rectangle(frame, (5, 463), (630, 477), (233, 111, 0), -1)
-    cv2.rectangle(frame, (5, 463), (int(630 * frame_count / 45), 477), (111, 233, 0), -1)
+    cv2.rectangle(frame, (5, 463), (int(630 * frame_count / 30), 477), (111, 233, 0), -1)
     cv2.rectangle(frame, (5, 440), (630, 460), (250, 250, 250), -1)
     cv2.putText(frame, word, (5, 458), cv2.FONT_HERSHEY_COMPLEX, 0.7, (20, 20, 20), 2)
 
@@ -71,7 +71,7 @@ DEVICE_ID = 0
 ALPH = ['А', 'Б', 'В', 'Г', 'И', 'К', 'Н', 'О', 'С']
 
 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 9, (640, 480), True)
+writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 10, (640, 480), True)
 classifier = Classifier(CLASSIFIER_MODEL_PATH)
 loaded_model = pickle.load(open(KEY_POINTS_CLASSIFIER_PATH, 'rb'))
 mp_drawing = mp.solutions.drawing_utils
@@ -116,15 +116,15 @@ while cap.isOpened():
             pts_to_pred = np.array(pts_to_pred).reshape(1, -1)
             pred_pts = loaded_model.predict_proba(pts_to_pred)[0]
             pred_cnn = classifier(crop)[0]
-            predictions.append(np.argmax(pred_pts))
-            mean_pred = (pred_cnn*0.5 + pred_pts*1.5) / 2
+            mean_pred = (pred_cnn*0.4 + pred_pts*1.6) / 2
+            predictions.append(np.argmax(mean_pred))
 
-            show_predict(pred_pts, image, 'pts')
-            show_predict(pred_cnn, image, 'cnn')
-            show_predict(mean_pred, image, 'mean')
+            # show_predict(pred_pts, image, 0, '  Points')
+            # show_predict(pred_cnn, image, 1, ' CNN')
+            show_predict(mean_pred, image, 1, '  Predict')
 
     draw_progress_bar(image, frame_count, word)
-    if frame_count == 45:
+    if frame_count == 30:
         mode_predict, val_count = mode(predictions)
         if val_count > frame_count // 2:
             word += ALPH[mode_predict[0]]
