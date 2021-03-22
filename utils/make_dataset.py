@@ -1,47 +1,57 @@
 import cv2
-import numpy as np
-from tracker.hand_tracker import HandTracker
-from app import crop_hand, detector, WINDOW, PALM_MODEL_PATH, ANCHORS_PATH, DEVICE_ID
+import mediapipe as mp
+import csv
 
+mp_drawing = mp.solutions.drawing_utils
+mp_hands = mp.solutions.hands
+cap = cv2.VideoCapture(0)
+hand = mp_hands.Hands(
+    max_num_hands=1,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5)
 
-def save_image(img, name):
-    cv2.imwrite(f'dataset/u/u_{name}_{np.random.randint(0, 1e5, 1)[0]}.png', img)
+record = False
+count = 0
+frame_count = 0
+gest = 'А'
+alph = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К',
+        'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц',
+        'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
+path_to_save = f'../dataset/letters/{gest}.csv'
 
+with open(path_to_save, 'a+') as file:
+    csv_file = csv.writer(file)
+    while cap.isOpened():
+        _, image = cap.read()
 
-def main():
-    capture = cv2.VideoCapture(DEVICE_ID)
-    cv2.namedWindow(WINDOW)
-    capture.set(cv2.CAP_PROP_FPS, 60)
-    write_dataset = False
-    value_counts = 0
-    name = 1
-    frame_counts = 0
-    while True:
-        _, frame = capture.read()
-        bbox = detector(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
+        image.flags.writeable = False
+        results = hand.process(image)
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        if bbox is not None:
-            crop, bbox_pt = crop_hand(bbox, frame)
-            if write_dataset and frame_counts%2 == 0:
-                save_image(cv2.resize(crop, (224, 224), interpolation=cv2.INTER_LINEAR), name)
-                name += 1
-                value_counts += 1
-                print(value_counts)
-            cv2.polylines(frame, bbox_pt, 1, (0, 255, 0), 2)
-            cv2.imshow('Palm', cv2.resize(crop, (224, 224), interpolation=cv2.INTER_LINEAR))
-            cv2.moveWindow('Palm', 20, 20)
+        if results.multi_hand_landmarks:
+            hand_landmarks = results.multi_hand_landmarks[0]
 
-        key = cv2.waitKey(1)
-        if key == 27:
+            if record and frame_count % 2 == 0:
+                points = []
+                for mark in hand_landmarks.landmark:
+                    points.extend([mark.x, mark.y, mark.z])
+
+                points.append(alph.index(gest))
+                csv_file.writerow(points)
+                count += 1
+                print(f'{count} recorded')
+
+            mp_drawing.draw_landmarks(
+                image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+        frame_count += 1
+        cv2.imshow('Make dataset', image)
+        key = cv2.waitKey(5)
+        if key & 0xFF == 27 or key == ord('q'):
             break
-        if key == ord('x'):
-            write_dataset = not write_dataset
-        cv2.imshow(WINDOW, frame)
-        frame_counts += 1
+        elif key == ord('r'):
+            record = not record
 
-    capture.release()
-    cv2.destroyAllWindows()
-
-
-if __name__ == '__main__':
-    main()
+cap.release()
