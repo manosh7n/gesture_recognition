@@ -14,13 +14,13 @@ mp_hands = mp.solutions.hands
 cap = cv2.VideoCapture(0)
 hand = mp_hands.Hands(
     max_num_hands=1,
-    min_detection_confidence=0.5,
+    min_detection_confidence=0.55,
     min_tracking_confidence=0.5)
 
 record = False
 count = 0
 frame_count = 0
-gest = 'А'
+gest = 'Н'
 alph = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К',
         'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц',
         'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
@@ -60,7 +60,7 @@ with open(path_to_save, 'a+') as file:
         key = cv2.waitKey(5)
         if key & 0xFF == 27 or key == ord('q'):
             break
-        elif key == ord('r'):
+        elif key == ord('z'):
             if record:
                 print('STOP RECORDING')
                 record = False
