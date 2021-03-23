@@ -2,6 +2,13 @@ import cv2
 import mediapipe as mp
 import csv
 
+
+def update_count():
+    with open(path_to_save, 'r') as csv_reader:
+        csv_r = csv.reader(csv_reader)
+        count_lines = len(list(csv_r))
+    return count_lines
+
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 cap = cv2.VideoCapture(0)
@@ -21,6 +28,7 @@ path_to_save = f'../dataset/letters/{gest}.csv'
 
 with open(path_to_save, 'a+') as file:
     csv_file = csv.writer(file)
+    count = update_count()
     while cap.isOpened():
         _, image = cap.read()
 
@@ -41,7 +49,8 @@ with open(path_to_save, 'a+') as file:
                 points.append(alph.index(gest))
                 csv_file.writerow(points)
                 count += 1
-                print(f'{count} recorded')
+                if count % 5 == 0:
+                    print(f'{count} recorded')
 
             mp_drawing.draw_landmarks(
                 image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
@@ -52,6 +61,12 @@ with open(path_to_save, 'a+') as file:
         if key & 0xFF == 27 or key == ord('q'):
             break
         elif key == ord('r'):
-            record = not record
-
+            if record:
+                print('STOP RECORDING')
+                record = False
+            else:
+                print('START RECORDING')
+                record = True
+        elif key == ord('u'):
+            count = update_count()
 cap.release()
