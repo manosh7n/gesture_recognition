@@ -49,8 +49,8 @@ with open('../dataset/wrong_predict.txt', 'r') as fin:
     _exit = False
     remaining = []
     h, w = 650, 700
-
-    for prediction in fin.readlines():
+    lines = fin.readlines()
+    for count, prediction in enumerate(lines, 1):
         idx, pred, true = map(int, prediction.split())
         remaining.extend([idx, pred, true])
 
@@ -59,7 +59,7 @@ with open('../dataset/wrong_predict.txt', 'r') as fin:
             pairs = get_pairs(example)
             image = np.zeros((h, w, 3), np.uint8)
             draw_hand(image, pairs)
-            print(f'| Pred: {ALPH[pred]} | True: {ALPH[true]} |')
+            print(f'Pred: {ALPH[pred]} | True: {ALPH[true]}  ({count}/{len(lines)})')
 
             while True:
                 cv2.imshow("Hand", image)

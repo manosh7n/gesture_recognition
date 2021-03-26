@@ -17,7 +17,7 @@ cap = cv2.VideoCapture(DEVICE_ID)
 record = False
 count = 0
 frame_count = 0
-gest = 'А'
+gest = 'У'
 
 path_to_save = f'../dataset/letters/{gest}.csv'
 
@@ -58,7 +58,7 @@ with open(path_to_save, 'a+') as file:
 
         frame_count += 1
         cv2.imshow(WINDOW, image)
-        key = cv2.waitKey(5)
+        key = cv2.waitKey(1)
         if key & 0xFF == 27 or key == ord('q'):
             break
         elif key == ord('z'):
@@ -73,5 +73,6 @@ with open(path_to_save, 'a+') as file:
             print('UPDATED')
 
 print(f'ELAPSED TIME: {np.round((time.time() - start) / 60, 2)} m')
+hand.close()
 cap.release()
 

@@ -1,7 +1,7 @@
 import mediapipe as mp
 
 
-KEY_POINTS_CLASSIFIER_PATH = 'models/lr_21.sav'
+KEY_POINTS_CLASSIFIER_PATH = 'models/lr_18.sav'
 DEVICE_ID = 0
 WINDOW = "Gesture recognition"
 
@@ -9,7 +9,7 @@ ALPH = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К',
         'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц',
         'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
 
-classes = ['А', 'Б', 'В', 'Г', 'Е', 'Ж', 'З', 'И', 'Л', 'М',
+classes = ['А', 'Б', 'В', 'Г', 'Е',  'З', 'И',
            'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Х', 'Ш', 'Ы', 'Э']
 
 mp_drawing = mp.solutions.drawing_utils
