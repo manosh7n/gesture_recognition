@@ -1,6 +1,8 @@
 import cv2
-import mediapipe as mp
+import numpy as np
 import csv
+import time
+from global_var import *
 
 
 def update_count():
@@ -9,23 +11,17 @@ def update_count():
         count_lines = len(list(csv_r))
     return count_lines
 
-mp_drawing = mp.solutions.drawing_utils
-mp_hands = mp.solutions.hands
-cap = cv2.VideoCapture(0)
-hand = mp_hands.Hands(
-    max_num_hands=1,
-    min_detection_confidence=0.55,
-    min_tracking_confidence=0.5)
+
+cap = cv2.VideoCapture(DEVICE_ID)
 
 record = False
 count = 0
 frame_count = 0
-gest = 'Н'
-alph = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К',
-        'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц',
-        'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
+gest = 'А'
+
 path_to_save = f'../dataset/letters/{gest}.csv'
 
+start = time.time()
 with open(path_to_save, 'a+') as file:
     csv_file = csv.writer(file)
     count = update_count()
@@ -42,11 +38,16 @@ with open(path_to_save, 'a+') as file:
             hand_landmarks = results.multi_hand_landmarks[0]
 
             if record and frame_count % 2 == 0:
+                if count >= 5000:
+                    record = False
+                    print('STOP RECORDING')
+                    continue
+
                 points = []
                 for mark in hand_landmarks.landmark:
                     points.extend([mark.x, mark.y, mark.z])
 
-                points.append(alph.index(gest))
+                points.append(ALPH.index(gest))
                 csv_file.writerow(points)
                 count += 1
                 if count % 5 == 0:
@@ -56,7 +57,7 @@ with open(path_to_save, 'a+') as file:
                 image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
         frame_count += 1
-        cv2.imshow('Make dataset', image)
+        cv2.imshow(WINDOW, image)
         key = cv2.waitKey(5)
         if key & 0xFF == 27 or key == ord('q'):
             break
@@ -69,4 +70,8 @@ with open(path_to_save, 'a+') as file:
                 record = True
         elif key == ord('u'):
             count = update_count()
+            print('UPDATED')
+
+print(f'ELAPSED TIME: {np.round((time.time() - start) / 60, 2)} m')
 cap.release()
+

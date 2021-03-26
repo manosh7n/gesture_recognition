@@ -4,7 +4,6 @@ import os
 
 
 csv_files = sorted(os.listdir('../dataset/letters'))
-SHAPE = (5000, 64)
 has_errors = False
 
 
@@ -16,25 +15,28 @@ def check_length():
                 if len(row) != 64:
                     global has_errors
                     has_errors = True
-                    print(f'Wrond len in: {file} -> len: {len(row)} -> line: {idx + 1}')
+                    print(f'Wrong len in: {file} -> len: {len(row)} -> line: {idx + 1}')
     if not has_errors:
-        print('(OK)')
+        print('OK')
 
 
 def check_shape():
     for file in csv_files:
         df = pd.read_csv(f'../dataset/letters/{file}', header=None)
-        if df.shape != SHAPE:
-            global has_errors
-            has_errors = True
+        if df.shape != (5000, 64):
             print(f'Wrong shape in: {file} -> {df.shape}')
+            if df.shape[1] != 64 or df.shape[0] < 5000:
+                global has_errors
+                has_errors = True
     if not has_errors:
-        print('(OK)')
+        print('OK')
 
 
 def validate():
-    print('CHECK LEN', end=' ')
+    print('CHECK LEN...')
     check_length()
-    print('CHECK SHAPE', end=' ')
+    print('CHECK SHAPE...')
     check_shape()
     return has_errors
+
+

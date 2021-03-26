@@ -1,18 +1,21 @@
 import cv2
 import numpy as np
 import pandas as pd
-
-
-df = pd.read_csv('../dataset/dataset.csv', header=None)
+from global_var import *
 
 CONNECTIONS = [(0, 1), (1, 2), (2, 3), (3, 4), (0, 5),
-              (5, 6), (6, 7), (7, 8), (5, 9),
-              (9, 10), (10, 11), (11, 12), (9, 13),
-              (13, 14), (14, 15), (15, 16), (13, 17),
-              (17, 18), (18, 19), (19, 20), (0, 17)]
-alph = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К',
-        'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц',
-        'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
+               (5, 6), (6, 7), (7, 8), (5, 9),
+               (9, 10), (10, 11), (11, 12), (9, 13),
+               (13, 14), (14, 15), (15, 16), (13, 17),
+               (17, 18), (18, 19), (19, 20), (0, 17)]
+
+
+def delete_outliers(index, label):
+    letter = ALPH[label]
+    df_letter = pd.read_csv(f'../dataset/letters/{letter}.csv', header=None)
+    print(f'DELETED: ({letter})')
+    df_letter.drop(df_letter.index[index % 5000], inplace=True)
+    df_letter.to_csv(f'../dataset/letters/{letter}.csv', index=False, header=False)
 
 
 def get_pairs(example):
@@ -40,21 +43,37 @@ def draw_hand(image, pairs):
                    (0, 0, 155), thickness=4)
 
 
-while True:
-    h, w = 650, 700
-    with open('../dataset/wrong_predict.txt', 'r') as fin:
+df = pd.read_csv('../dataset/dataset.csv', header=None)
 
-        for prediction in fin.readlines():
-            idx, pred, true = map(int, map(float, prediction.split()))
+with open('../dataset/wrong_predict.txt', 'r') as fin:
+    _exit = False
+    remaining = []
+    h, w = 650, 700
+
+    for prediction in fin.readlines():
+        idx, pred, true = map(int, prediction.split())
+        remaining.extend([idx, pred, true])
+
+        if not _exit:
             example = df.iloc[idx, :63].to_numpy()
             pairs = get_pairs(example)
-
             image = np.zeros((h, w, 3), np.uint8)
             draw_hand(image, pairs)
-            print(f'| Pred: {alph[pred]} | True: {alph[true]} |')
+            print(f'| Pred: {ALPH[pred]} | True: {ALPH[true]} |')
 
             while True:
                 cv2.imshow("Hand", image)
                 key = cv2.waitKey(1000)
                 if key == ord('n'):
                     break
+                if key == ord('r'):
+                    delete_outliers(idx, true)
+                    remaining = remaining[:-3]
+                    break
+                if key == ord('q'):
+                    _exit = True
+                    break
+
+with open('../dataset/wrong_predict.txt', 'w') as fout:
+    for line in list(zip(remaining[::3], remaining[1::3], remaining[2::3])):
+        print(*line, file=fout)
