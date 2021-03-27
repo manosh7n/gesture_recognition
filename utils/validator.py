@@ -23,11 +23,13 @@ def check_length():
 def check_shape():
     for file in csv_files:
         df = pd.read_csv(f'../dataset/letters/{file}', header=None)
-        if df.shape != (5000, 64):
+        if df.shape[0] < 5000 or df.shape[1] != 64:
             print(f'Wrong shape in: {file} -> {df.shape}')
-            if df.shape[1] != 64 or df.shape[0] < 5000:
-                global has_errors
-                has_errors = True
+            global has_errors
+            has_errors = True
+        if df.shape[0] > 5000:
+            print(f'Oversize in: {file} -> {df.shape[0]}')
+
     if not has_errors:
         print('OK')
 
