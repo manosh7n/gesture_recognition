@@ -21,17 +21,21 @@ def check_length():
 
 
 def check_shape():
+    letters = []
     for file in csv_files:
         df = pd.read_csv(f'../dataset/letters/{file}', header=None)
         if df.shape[0] < 5000 or df.shape[1] != 64:
             print(f'Wrong shape in: {file} -> {df.shape}')
             global has_errors
             has_errors = True
+            letters.append(file[0])
         if df.shape[0] > 5000:
             print(f'Oversize in: {file} -> {df.shape[0]}')
 
     if not has_errors:
         print('OK')
+    else:
+        print(f'ERROR in: {letters}')
 
 
 def validate():
@@ -40,5 +44,9 @@ def validate():
     print('CHECK SHAPE...')
     check_shape()
     return has_errors
+
+
+if __name__ == '__main__':
+    validate()
 
 

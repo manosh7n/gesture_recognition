@@ -47,7 +47,7 @@ while cap.isOpened():
         hand_landmarks = results.multi_hand_landmarks[0]
 
         for mark in hand_landmarks.landmark:
-            points_xyz.extend([mark.x, mark.y, mark.z])
+            points_xyz.extend([mark.x, mark.y])
 
         mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 

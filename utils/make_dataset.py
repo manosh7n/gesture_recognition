@@ -17,7 +17,7 @@ cap = cv2.VideoCapture(DEVICE_ID)
 record = False
 count = 0
 frame_count = 0
-gest = 'У'
+gest = 'Я'
 
 path_to_save = f'../dataset/letters/{gest}.csv'
 
@@ -41,7 +41,8 @@ with open(path_to_save, 'a+') as file:
                 if count >= 5000:
                     record = False
                     print('STOP RECORDING')
-                    continue
+                    # continue
+                    break
 
                 points = []
                 for mark in hand_landmarks.landmark:
