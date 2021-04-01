@@ -4,6 +4,7 @@ import pandas as pd
 from global_var import *
 import random
 
+
 CONNECTIONS = [(0, 1), (1, 2), (2, 3), (3, 4), (0, 5),
                (5, 6), (6, 7), (7, 8), (5, 9),
                (9, 10), (10, 11), (11, 12), (9, 13),
@@ -12,12 +13,12 @@ CONNECTIONS = [(0, 1), (1, 2), (2, 3), (3, 4), (0, 5),
 h, w = 650, 700
 
 
-def delete_outliers(index, label):
-    letter = ALPH[label]
-    df_letter = pd.read_csv(f'../dataset/letters/{letter}.csv', header=None)
-    print(f'DELETED: ({letter})')
-    df_letter.drop(df_letter.index[index % 5000], inplace=True)
-    df_letter.to_csv(f'../dataset/letters/{letter}.csv', index=False, header=False)
+def delete_outliers(idx_to_delete):
+    for letter, indexes in idx_to_delete.items():
+        df_letter = pd.read_csv(f'../dataset/letters/{letter}.csv', header=None)
+        df_letter.drop(index=indexes, inplace=True)
+        df_letter.to_csv(f'../dataset/letters/{letter}.csv', index=False, header=False)
+        print(f'DELETED: ({letter}) -> {len(indexes)}')
 
 
 def get_pairs(example, aug=False, alpha=None):
@@ -56,12 +57,15 @@ def draw_hand(image, pairs):
                    (int(h * pair[0]), int(w * pair[1])), 1,
                    (0, 0, 155), thickness=4)
 
+
 if __name__ == '__main__':
     df = pd.read_csv('../dataset/dataset.csv', header=None)
 
     with open('../dataset/wrong_predict.txt', 'r') as fin:
         _exit = False
         remaining = []
+        idx_to_delete = {}
+
         lines = fin.readlines()
         for count, prediction in enumerate(lines, 1):
             idx, pred, true = map(int, prediction.split())
@@ -70,6 +74,7 @@ if __name__ == '__main__':
             if not _exit:
                 example = df.iloc[idx, :63].to_numpy()
                 pairs = get_pairs(example)
+
                 image = np.zeros((h, w, 3), np.uint8)
                 draw_hand(image, pairs)
                 print(f'Pred: {ALPH[pred]} | True: {ALPH[true]}  ({count}/{len(lines)})')
@@ -80,12 +85,18 @@ if __name__ == '__main__':
                     if key == ord('n'):
                         break
                     if key == ord('r'):
-                        delete_outliers(idx, true)
+                        label = ALPH[true]
+                        if label not in idx_to_delete:
+                            idx_to_delete[label] = [idx % 5000]
+                        else:
+                            idx_to_delete[label].append(idx % 5000)
                         remaining = remaining[:-3]
                         break
                     if key == ord('q'):
                         _exit = True
                         break
+
+    delete_outliers(idx_to_delete)
 
     with open('../dataset/wrong_predict.txt', 'w') as fout:
         for line in list(zip(remaining[::3], remaining[1::3], remaining[2::3])):
