@@ -17,8 +17,8 @@ cap = cv2.VideoCapture(DEVICE_ID)
 record = False
 count = 0
 frame_count = 0
-gest = 'Я'
-
+gest = 'Ф'
+# ['А', 'Б', 'В', 'Г', 'Е', 'З', 'И', 'К', 'М', 'Н', 'П', 'Р', 'Т', 'Ф', 'Ч', 'Ш', 'Ы', 'Э', 'Я']
 path_to_save = f'../dataset/letters/{gest}.csv'
 
 start = time.time()
@@ -46,7 +46,7 @@ with open(path_to_save, 'a+') as file:
 
                 points = []
                 for mark in hand_landmarks.landmark:
-                    points.extend([mark.x, mark.y, mark.z])
+                    points.extend([mark.x, mark.y])
 
                 points.append(ALPH.index(gest))
                 csv_file.writerow(points)

@@ -12,7 +12,7 @@ def check_length():
         with open(f'../dataset/letters/{file}', 'r') as csv_file:
             reader = csv.reader(csv_file)
             for idx, row in enumerate(reader):
-                if len(row) != 64:
+                if len(row) != 43:
                     global has_errors
                     has_errors = True
                     print(f'Wrong len in: {file} -> len: {len(row)} -> line: {idx + 1}')
@@ -24,7 +24,7 @@ def check_shape():
     letters = []
     for file in csv_files:
         df = pd.read_csv(f'../dataset/letters/{file}', header=None)
-        if df.shape[0] < 5000 or df.shape[1] != 64:
+        if df.shape[0] < 5000 or df.shape[1] != 43:
             print(f'Wrong shape in: {file} -> {df.shape}')
             global has_errors
             has_errors = True

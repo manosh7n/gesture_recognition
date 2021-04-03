@@ -30,10 +30,9 @@ def get_pairs(example, aug=False, alpha=None):
         rotor = np.array([[np.cos(alpha), np.sin(alpha)], [-np.sin(alpha), np.cos(alpha)]])
 
     for index, point in enumerate(example, 1):
-        if index % 3 != 0:
-            if aug:
-                point += random.uniform(0, 0.008)
-            points.append(point)
+        if aug:
+            point += random.uniform(0, 0.01)
+        points.append(point)
     if aug:
         point_r = random.randint(0, 20)
         origin = [points[point_r*2], points[point_r*2+1]]
