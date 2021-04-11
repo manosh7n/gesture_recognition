@@ -21,7 +21,7 @@ def delete_outliers(idx_to_delete):
         print(f'DELETED: ({letter}) -> {len(indexes)}')
 
 
-def get_pairs(example, aug=False, alpha=None):
+def get_pairs(example, aug=False, alpha=None, shift=0.005):
     points = []
     pairs = []
 
@@ -31,7 +31,7 @@ def get_pairs(example, aug=False, alpha=None):
 
     for index, point in enumerate(example, 1):
         if aug:
-            point += random.uniform(0, 0.01)
+            point += random.uniform(0, shift)
         points.append(point)
     if aug:
         point_r = random.randint(0, 20)
