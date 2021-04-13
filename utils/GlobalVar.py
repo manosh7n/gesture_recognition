@@ -13,7 +13,7 @@ classes = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К', 'Л', 'М
            'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш',
            'Ы', 'Ь', 'Э', 'Ю', 'Я']
 
-KEY_POINTS_CLASSIFIER_PATH = f'models/lr_{len(classes)}.sav'
+KEY_POINTS_CLASSIFIER_PATH = f'models/LogReg_{len(classes)}.sav'
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands

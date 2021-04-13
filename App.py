@@ -1,7 +1,9 @@
 import cv2
 import pickle
 import numpy as np
-from utils.global_var import *
+from utils.Distance import *
+from utils.GlobalVar import *
+from more_itertools import unique_justseen as uj
 
 
 def show_predict(predict, frame):
@@ -28,6 +30,8 @@ clf = pickle.load(open(KEY_POINTS_CLASSIFIER_PATH, 'rb'))
 
 frame_count = 0
 predictions = []
+isRecording = False
+prev_length = 0
 
 while cap.isOpened():
     success, image = cap.read()
@@ -43,27 +47,50 @@ while cap.isOpened():
     # If there is a hand in the frame
     if results.multi_hand_landmarks:
         frame_count += 1
-        points_xyz = []
-        hand_landmarks = results.multi_hand_landmarks[0]
 
+        hand_landmarks = results.multi_hand_landmarks[0]
+        mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+        points_xyz = []
         for mark in hand_landmarks.landmark:
             points_xyz.extend([mark.x, mark.y])
 
-        mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-
         points_xyz = np.array(points_xyz).reshape(1, -1)
-        pred = clf.predict_proba(points_xyz)[0]
 
+        x_max, x_min = int(np.max(points_xyz[0][::2]) * image.shape[1]), int(np.min(points_xyz[0][::2]) * image.shape[1])
+        y_max, y_min = int(np.max(points_xyz[0][1::2]) * image.shape[0]), int(np.min(points_xyz[0][1::2]) * image.shape[0])
+        line_length = np.sqrt((x_max - x_min)**2 + (y_max - y_min)**2)
+        diff = np.abs(line_length - prev_length)
+        prev_length = line_length
+        percent_diff = diff * 100 / line_length
+        cv2.line(image, (x_max, y_max), (x_min, y_min), (200, 10, 10), 2, cv2.LINE_AA)
+        cv2.circle(image, (x_max, y_max), 1, (10, 10, 220), 3)
+        cv2.circle(image, (x_min, y_min), 1, (10, 10, 220), 3)
+
+        pred = clf.predict_proba(points_xyz)[0]
         show_predict(pred, image)
 
-    cv2.imshow(WINDOW, image)
+        if isRecording:
+            if np.max(pred) > 0.999 and percent_diff < 0.75:
+                predictions.append(classes[np.argmax(pred)])
 
-    # if writer is not None:
-    #     writer.write(image)
+    cv2.imshow(WINDOW, image)
 
     key = cv2.waitKey(5)
     if key & 0xFF == 27 or key == ord('q'):
         break
+    if key == ord('s'):
+        if isRecording:
+            isRecording = False
+            predictions = "".join(list(uj(predictions)))
+            print(f'Input: {predictions}, Predict: {min_distance(predictions)}')
+        else:
+            print('Start')
+            predictions = []
+            isRecording = True
+
+    # if writer is not None:
+    #     writer.write(image)
 
 
 # if writer is not None:

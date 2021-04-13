@@ -1,7 +1,7 @@
 import cv2
 import random
 import numpy as np
-from draw_wrong_predict import get_pairs, draw_hand, h, w
+from DrawWrongPredict import get_pairs, draw_hand, h, w
 
 
 letter = 'Б'

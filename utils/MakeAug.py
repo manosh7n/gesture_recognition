@@ -1,7 +1,7 @@
 import csv
 import random
-from draw_wrong_predict import get_pairs
-from global_var import *
+from DrawWrongPredict import get_pairs
+from GlobalVar import *
 
 letter = 'А'
 

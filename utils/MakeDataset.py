@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import csv
 import time
-from global_var import *
+from GlobalVar import *
 
 
 def update_count():

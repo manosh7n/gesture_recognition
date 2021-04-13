@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import cv2
 import csv
-from draw_wrong_predict import get_pairs, draw_hand, h, w
-from global_var import *
+from DrawWrongPredict import get_pairs, draw_hand, h, w
+from GlobalVar import *
 
 
 def draw_sample(image):

@@ -1,5 +1,5 @@
 import pandas as pd
-from validator import validate, csv_files
+from Validator import validate, csv_files
 
 
 if not validate():

@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import pandas as pd
-from global_var import *
+from GlobalVar import *
 import random
 
 
