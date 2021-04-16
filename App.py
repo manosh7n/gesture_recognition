@@ -1,6 +1,7 @@
 import cv2
 import pickle
 import numpy as np
+from scipy.stats import mode
 from utils.Distance import *
 from utils.GlobalVar import *
 from more_itertools import unique_justseen as uj
@@ -24,12 +25,13 @@ def show_predict(predict, frame):
 cap = cv2.VideoCapture(DEVICE_ID)
 cv2.namedWindow(WINDOW)
 # fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-# writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 10, (640, 480), True)
+# writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 10, (1280, 720), True)
 
 clf = pickle.load(open(KEY_POINTS_CLASSIFIER_PATH, 'rb'))
 
 frame_count = 0
 predictions = []
+prev_predictions = []
 isRecording = False
 prev_length = 0
 
@@ -71,9 +73,14 @@ while cap.isOpened():
         show_predict(pred, image)
 
         if isRecording:
-            if np.max(pred) > 0.999 and percent_diff < 0.75:
-                predictions.append(classes[np.argmax(pred)])
-
+            if np.max(pred) > 0.99 and percent_diff < 0.75:
+                if len(prev_predictions) > 10:
+                    letter = mode(prev_predictions)[0][0]
+                    if len(predictions) == 0 or predictions[-1] != letter:
+                        predictions.append(letter)
+                    prev_predictions = []
+                else:
+                    prev_predictions.append(classes[np.argmax(pred)])
     cv2.imshow(WINDOW, image)
 
     key = cv2.waitKey(5)

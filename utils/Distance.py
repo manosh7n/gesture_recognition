@@ -1,3 +1,16 @@
+def custom_edit(first, second):
+    similar = [('ш', 'щ'), ('и', 'й'), ('ь', 'ъ'), ('е', 'ё')]
+
+    if first == second:
+        return True
+
+    for f, s in similar:
+        if first == f and second == s:
+            return True
+
+    return False
+
+
 def levenshtein_distance(s1, s2):
     if s1 == s2:
         return 0
@@ -14,8 +27,8 @@ def levenshtein_distance(s1, s2):
         prev, cur = cur, [r] + [0] * (cols - 1)
         for c in range(1, cols):
             deletion = prev[c] + 1
-            insertion = cur[c - 1] + 1.5
-            edit = prev[c - 1] + (0 if s1[r - 1] == s2[c - 1] else 2)
+            insertion = cur[c - 1] + 1
+            edit = prev[c - 1] + (0 if custom_edit(s1[r - 1], s2[c - 1]) else 1)
             cur[c] = min(edit, deletion, insertion)
 
     return cur[-1]
