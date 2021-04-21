@@ -20,7 +20,7 @@ isRecording = False
 prev_length = 0
 
 
-def show_predict(predict: np.ndarray[float], frame: np.ndarray[float], corner_coo: tuple[int, int]):
+def show_predict(predict: np.ndarray, frame: np.ndarray, corner_coo: tuple[int, int]):
     """
     Displaying the classified gesture in the upper-right corner of the bounding box
     @param predict: array of predicted probabilities
@@ -33,7 +33,7 @@ def show_predict(predict: np.ndarray[float], frame: np.ndarray[float], corner_co
                 cv2.FONT_HERSHEY_COMPLEX, 1.7, (0, 0, 0), 2)
 
 
-def draw_bb(points: np.ndarray[float]) -> (float, tuple[int, int]):
+def draw_bb(points: np.ndarray) -> (float, tuple[int, int]):
     """
         Draw bounding box and and returns the difference between the lengths of the diagonals between the frames
         (it is necessary to check whether the gesture changes or the same one is displayed), the coordinates
