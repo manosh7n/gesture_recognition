@@ -43,7 +43,7 @@ def validate():
     check_length()
     print('CHECK SHAPE...')
     check_shape()
-    return has_errors
+    return not has_errors
 
 
 if __name__ == '__main__':
