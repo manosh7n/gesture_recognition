@@ -4,7 +4,6 @@ import numpy as np
 from scipy.stats import mode
 from utils.Distance import *
 from utils.GlobalVar import *
-from more_itertools import unique_justseen as uj
 
 
 cap = cv2.VideoCapture(DEVICE_ID)
@@ -13,24 +12,73 @@ clf = pickle.load(open(KEY_POINTS_CLASSIFIER_PATH, 'rb'))
 # fourcc = cv2.VideoWriter_fourcc(*"MJPG")
 # writer = cv2.VideoWriter('videos/output_01.avi', fourcc, 10, (1280, 720), True)
 
+
+# frame_count:
+#            frame count counter (needed for classifying every N frames)
+# predictions:
+#            when recording (isRecording = True), the classified letter is added to the predictions list
+# prev_predictions:
+#            the last N classified letters
+#            (required to add a letter to the predictions that occurs more often than the others)
+# similar_words:
+#            words with the minimum Levenshtein distance to the recorded word
+# prev_length:
+#            previous diagonal length of the bounding box
 frame_count = 0
 predictions = []
 prev_predictions = []
+similar_words = None
 isRecording = False
 prev_length = 0
+
+
+def show_sim_words(_input: str, predict: tuple[int, list[str]], frame: np.ndarray):
+    """
+        Displays the nearest 5 words to the recorded word
+    @param _input: a word written with gestures
+    @param predict: the words closest to the _input and the Levenshtein distance to them
+    @param frame: frame to display
+    """
+
+    if similar_words is not None and len(_input) != 0:
+        words = predict[1][:5]
+        cv2.rectangle(frame, (0, 0), (350, 150), (255, 255, 255),
+                      thickness=-1)
+        cv2.putText(frame, f'Введено: [{_input}]', (5, 20),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.55, (0, 0, 0), 1)
+        if predict[0] > 3:
+            cv2.putText(frame, 'Неккоректное слово', (5, 40),
+                        cv2.FONT_HERSHEY_COMPLEX, 0.55, (0, 0, 0), 1)
+            return
+
+        cv2.putText(frame, 'Возможные слова:' if len(words) > 1 else 'Слово:', (5, 40),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.55, (0, 0, 0), 1)
+
+        for i, word in enumerate(words):
+            cv2.putText(frame, word, (5, 60+i*20),
+                        cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0), 1)
 
 
 def show_predict(predict: np.ndarray, frame: np.ndarray, corner_coo: tuple[int, int]):
     """
     Displaying the classified gesture in the upper-right corner of the bounding box
+    and the probability in the lower right corner of the screen
+
     @param predict: array of predicted probabilities
-    @param frame: the frame where the letter is displayed
+    @param frame: frame to display
     @param corner_coo: the coordinate where the letter is displayed
     """
+
     cv2.rectangle(frame, corner_coo, (corner_coo[0] + 70, corner_coo[1] - 70),
+                  (255, 255, 255) if not isRecording else (0, 0, 200), thickness=-1)
+    cv2.rectangle(frame, (frame.shape[1]-90, frame.shape[0] - 25), (frame.shape[:2][1], frame.shape[:2][0]),
                   (255, 255, 255), thickness=-1)
+    cv2.putText(frame, f'{np.max(predict):.3f}', (frame.shape[1]-90, frame.shape[:2][0] - 3),
+                cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2)
     cv2.putText(frame, f'{classes[np.argmax(predict)]}', (corner_coo[0] + 18, corner_coo[1] - 18),
                 cv2.FONT_HERSHEY_COMPLEX, 1.7, (0, 0, 0), 2)
+    if isRecording:
+        cv2.circle(frame, (int(frame.shape[1] - 25), 15), 8, (0, 0, 255), -1)
 
 
 def draw_bb(points: np.ndarray) -> (float, tuple[int, int]):
@@ -91,33 +139,34 @@ while cap.isOpened():
         pred = clf.predict_proba(points_xyz)[0]
         show_predict(pred, image, right_up_corner)
 
-        if isRecording:
-            if np.max(pred) > 0.99 and difference < 0.75 and frame_count % 2 == 0:
-                if len(prev_predictions) > 10:
+        if isRecording and frame_count % 2 == 0:
+            if np.max(pred) > 0.99 and difference < 0.45:
+                if len(prev_predictions) > 5:
                     letter = mode(prev_predictions)[0][0]
                     if len(predictions) == 0 or predictions[-1] != letter:
                         predictions.append(letter)
                     prev_predictions = []
                 else:
                     prev_predictions.append(classes[np.argmax(pred)])
-    cv2.imshow(WINDOW, image)
 
+    show_sim_words(predictions, similar_words, image)
+    cv2.imshow(WINDOW, image)
     key = cv2.waitKey(5)
 
     if key & 0xFF == 27 or key == ord('q'):
         break
-
     # if "s" is pressed, the predicted letters are written to the list,
     # and then the closest word to the word in the list is calculated using the Levenshtein distance.
     if key == ord('s'):
         if isRecording:
             isRecording = False
-            predictions = "".join(list(uj(predictions)))
-            print(f'Input: {predictions}, Predict: {min_distance(predictions)}')
+            predictions = "".join(predictions)
+            similar_words = min_distance(predictions)
+            print(f'Input: {predictions}, Predict: {similar_words}')
         else:
-            print('Start')
             predictions = []
             isRecording = True
+            similar_words = None
 
     # if writer is not None:
     #     writer.write(image)

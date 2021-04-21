@@ -38,7 +38,7 @@ def min_distance(pred):
     dist = []
     min_dist = 1e6
     similar_words = []
-    with open('word_rus.txt', 'r') as file:
+    with open('./dataset/dict_example_30k.txt', 'r') as file:
         for word in file.readlines():
             word = word[:-1]
             d = levenshtein_distance(pred.lower(), word)
