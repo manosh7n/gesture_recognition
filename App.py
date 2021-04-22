@@ -32,7 +32,7 @@ isRecording = False
 prev_length = 0
 
 
-def show_sim_words(_input: str, predict: tuple[int, list[str]], frame: np.ndarray):
+def show_sim_words(_input: str, predict: tuple, frame: np.ndarray):
     """
         Displays the nearest 5 words to the recorded word
     @param _input: a word written with gestures
@@ -59,7 +59,7 @@ def show_sim_words(_input: str, predict: tuple[int, list[str]], frame: np.ndarra
                         cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0), 1)
 
 
-def show_predict(predict: np.ndarray, frame: np.ndarray, corner_coo: tuple[int, int]):
+def show_predict(predict: np.ndarray, frame: np.ndarray, corner_coo: tuple):
     """
     Displaying the classified gesture in the upper-right corner of the bounding box
     and the probability in the lower right corner of the screen
@@ -81,7 +81,7 @@ def show_predict(predict: np.ndarray, frame: np.ndarray, corner_coo: tuple[int, 
         cv2.circle(frame, (int(frame.shape[1] - 25), 15), 8, (0, 0, 255), -1)
 
 
-def draw_bb(points: np.ndarray) -> (float, tuple[int, int]):
+def draw_bb(points: np.ndarray):
     """
         Draw bounding box and and returns the difference between the lengths of the diagonals between the frames
         (it is necessary to check whether the gesture changes or the same one is displayed), the coordinates
