@@ -54,6 +54,8 @@ To record a word, you need to press "S", record the word using gestures, and pre
 
 #### Example of work
 ![Alt Text](utils/readme_img/example.gif)
+##### Recording word
+![Alt Text](utils/readme_img/example_word.gif)
 
 ### Instructions for running:
 

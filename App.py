@@ -139,7 +139,7 @@ while cap.isOpened():
         pred = clf.predict_proba(points_xyz)[0]
         show_predict(pred, image, right_up_corner)
 
-        if isRecording and frame_count % 2 == 0:
+        if isRecording:
             if np.max(pred) > 0.99 and difference < 0.45:
                 if len(prev_predictions) > 5:
                     letter = mode(prev_predictions)[0][0]
