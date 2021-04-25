@@ -13,7 +13,7 @@ def draw_sample(image):
     return sample
 
 
-letter = 'Б'
+letter = 'Я'
 
 df = pd.read_csv(f'../dataset/letters/{letter}.csv', header=None)
 image = np.zeros((h, w, 3), np.float32)
@@ -25,7 +25,7 @@ with open(f'../dataset/letters/for_aug/{letter}_for_aug.csv', 'a+') as file:
     while True:
         cv2.imshow(WINDOW, image)
         key = cv2.waitKey(1000)
-        if key == ord('q'):
+        if key == ord('q') or count == 75:
             break
         if key == ord('a') or key == ord('n'):
             image = np.zeros((h, w, 3), np.float32)
