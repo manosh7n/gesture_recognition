@@ -75,8 +75,8 @@ def show_predict(predict: np.ndarray, frame: np.ndarray, corner_coo: tuple):
                   (255, 255, 255), thickness=-1)
     cv2.putText(frame, f'{np.max(predict):.3f}', (frame.shape[1]-90, frame.shape[:2][0] - 3),
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(frame, f'{classes[np.argmax(predict)]}', (corner_coo[0] + 18, corner_coo[1] - 18),
-                cv2.FONT_HERSHEY_COMPLEX, 1.7, (0, 0, 0), 2)
+    cv2.putText(frame, f'{classes[np.argmax(predict)]}' if np.max(predict) > 0.99 else '-',
+                (corner_coo[0] + 18, corner_coo[1] - 18), cv2.FONT_HERSHEY_COMPLEX, 1.7, (0, 0, 0), 2)
     if isRecording:
         cv2.circle(frame, (int(frame.shape[1] - 25), 15), 8, (0, 0, 255), -1)
 
@@ -140,8 +140,8 @@ while cap.isOpened():
         show_predict(pred, image, right_up_corner)
 
         if isRecording:
-            if np.max(pred) > 0.99 and difference < 0.45:
-                if len(prev_predictions) > 5:
+            if np.max(pred) > 0.94 and difference < 0.45:
+                if len(prev_predictions) > 4:
                     letter = mode(prev_predictions)[0][0]
                     if len(predictions) == 0 or predictions[-1] != letter:
                         predictions.append(letter)

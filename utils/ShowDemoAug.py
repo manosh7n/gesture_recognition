@@ -21,6 +21,6 @@ with open(f'../dataset/letters/for_aug/{letter}_for_aug.csv', 'r') as fin:
             if key == ord('q'):
                 break
             if key == ord('n'):
-                pairs = get_pairs(line, aug=True, alpha=random.uniform(-15, 15))
+                pairs = get_pairs(line, aug=True, alpha=random.uniform(-15, 15), shift=0.02)
                 image = np.zeros((h, w, 3), np.uint8)
                 draw_hand(image, pairs)

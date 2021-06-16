@@ -12,7 +12,7 @@ with open(f'../dataset/letters/for_aug/{letter}_for_aug.csv', 'r') as fin, \
         line = list(map(float, line.split(',')))
 
         for _ in range(10):
-            pairs = get_pairs(line, aug=True, alpha=random.uniform(-15, 15))
+            pairs = get_pairs(line, aug=True, alpha=random.uniform(-15, 15), shift=0.005)
             sample = []
             for i in pairs:
                 sample.extend([i[0], i[1]])
