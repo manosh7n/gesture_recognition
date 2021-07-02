@@ -1,0 +1,17 @@
+https://drive.google.com/drive/folders/1NN8MOG2CxWoT-DonVrd2fW7ZIxD4v5pt?usp=sharing
+(390 Mb)
+
+Contains:
+
+1) dataset.csv (shape: (145000, 43))
+ - 29 targets * 5000 samples = 145000
+ - 21 keypoints * 2 coordinates(x,y) + target column = 43
+
+2) dataset_aug.csv (shape:(166750, 43)
+ - 145000 + 29 targets * 750 aurmented samples = 166750
+
+3) The letter folder contains. csv files for each target.
+ - There are 5000 samples in each file.
+ - There are also files with augmented samples (prefix '__') for each target (750 examples in each).
+ - Merging all the files into one will give the dataset_aug.csv file,
+   without augmentation will give the dataset.csv file

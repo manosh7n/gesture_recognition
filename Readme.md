@@ -82,8 +82,8 @@ To record a word, you need to press "S", record the word using gestures, and pre
 
    `python App.py`
 
-5) To turn it off click *Esc*
+5) To turn it off click *Esc* or *q*
 
 ##### Possible problem
 
-If the program shuts down immediately after starting, you can change the `DEVICE_ID` value in `./utils/GlovalVar.py` from 0 to [1, 2, 3, 4]. In my case, the webcam is at number 0.
+If the program shuts down immediately after starting, you can change the `DEVICE_ID` value in `./utils/GlobalVar.py` from 0 to [1, 2, 3, 4]. In my case, the webcam is at number 0.
